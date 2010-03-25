@@ -1,0 +1,6 @@
+; $Id$
+name = "One Click API"
+description = "API for one click site."
+core = 7.x
+package = One Click
+files[] = oneclick_api.module
