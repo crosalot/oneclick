@@ -3,5 +3,6 @@ name = "One Click Client"
 description = "Support for oneclick module"
 core = 7.x
 package = One Click
+dependencies[] = oneclick_api
 files[] = oneclick_client.module
 files[] = oneclick_client.install

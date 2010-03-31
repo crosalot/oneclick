@@ -10,17 +10,24 @@ function oneclick_client_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-
+  $items['admin/themes'] = array(
+    'title' => 'Appearance',
+    'description' => 'Select your themes',
+    'page callback' => 'oneclick_client_theme_select',
+    'access arguments' => array('administer themes'),
+    'position' => 'left',
+    'weight' => -6,
+    'file' => 'oneclick_client.admin.inc',
+  );
   return $items;
 }
 
 function oneclick_client_init() {
   //variable_set('site_waiting', TRUE); 
   //exit();
-  if (variable_get('admin_waiting', FALSE) && !user_is_logged_in()) {
+  if (variable_get('site_waiting', TRUE)) {
 
-    variable_set('admin_waiting', FALSE);
-    /*
+    variable_set('site_waiting', FALSE);
     variable_set('root_site', 'openweb.in.th');
 
     drupal_http_request('http://'.variable_get('root_site', '').'/create_sitecon/'.variable_get('site_name', 'localhost').'?return=true');
@@ -43,14 +50,22 @@ function oneclick_client_init() {
         ->condition('uid', $user->uid)
         ->execute();
     }
-    */
-    drupal_goto('http://'.variable_get('root_site', '').'/sitecon/client/connect/'.variable_get('site_name', 'localhost').'/login', array('query' => array('redirect' => 'http://'.variable_get('site_name', 'localhost'))));
+
+    // Set some variables
+    variable_set('site_mail', $user->mail);
+    variable_set('theme_default', 'seven');
+    variable_set('error_level', ERROR_REPORTING_DISPLAY_SOME);
+    
+    // Connect to root site and open session for admin user.
+    $first_front = 'http://'.variable_get('site_name', 'localhost').'/admin/appearance?destinatoin=admin/features';
+    drupal_goto('http://'.variable_get('root_site', '').'/sitecon/client/connect/'.variable_get('site_name', 'localhost').'/login', array('query' => array('redirect' => $first_front)));
   }  
-  
 }
 
 function oneclick_client_is_waiting() {
   print $_GET['callback'].'('.json_encode(array('waiting' => variable_get('site_waiting', TRUE))).')';
 }
 
-
+// For debug
+function oneclick_client_form_alter(&$form, &$form_state, $form_id) {
+}
