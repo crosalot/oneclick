@@ -10,15 +10,6 @@ function oneclick_client_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-  $items['admin/themes'] = array(
-    'title' => 'Appearance',
-    'description' => 'Select your themes',
-    'page callback' => 'oneclick_client_theme_select',
-    'access arguments' => array('administer themes'),
-    'position' => 'left',
-    'weight' => -6,
-    'file' => 'oneclick_client.admin.inc',
-  );
   return $items;
 }
 

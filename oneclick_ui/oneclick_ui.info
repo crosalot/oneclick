@@ -1,0 +1,9 @@
+; $Id$
+name = One Click UI
+description = User interface things
+core = 7.x
+version = 7.x-0.1
+package = One Click
+
+files[] = oneclick_ui.module
+files[] = oneclick_ui.admin.inc

@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Implement hook_menu().
+ */
+function oneclick_ui_menu() {
+  $items['admin/themes'] = array(
+    'title' => t('Themes'),
+    'page callback' => 'oneclick_ui_theme_select',
+    'access arguments' => array('administer themes'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'oneclick_ui.admin.inc',
+  );
+  $items['admin/themes/activate'] = array(
+    'title' => t('Activate theme'),
+    'page callback' => 'oneclick_ui_active_theme',
+    'access arguments' => array('administer themes'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implement hook_theme().
+ */
+function oneclick_ui_theme() {
+  return array(
+    'oneclick_ui_theme_select' => array(
+      'variables' => array('theme_groups' => NULL, 'theme_group_titles' => NULL),
+    ),
+  );
+}
+
+/**
+ * Menu callback; Set the default theme.
+ */
+function oneclick_ui_active_theme() {
+  require_once drupal_get_path('module', 'system') .'/system.admin.inc';
+  if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && drupal_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
+    $theme = $_REQUEST['theme'];
+    // Get current list of themes.
+    $themes =& _system_theme_list();
+
+    // Check if the specified theme is one recognized by the system.
+    if (!empty($themes[$theme])) {
+      // Enable the theme if it is currently disabled.
+      if (empty($themes[$theme]->status)) {
+       theme_enable(array($theme));
+      }
+      // Set the default theme.
+      variable_set('theme_default', $theme);
+      // The status message depends on whether an admin theme is currently in use.
+      $admin_theme = variable_get('admin_theme', 0);
+      if ($admin_theme != $theme) {
+        drupal_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
+          '%admin_theme' => $themes[$admin_theme]->info['name'],
+          '%selected_theme' => $themes[$theme]->info['name'],
+        )));
+      }
+      else {
+        drupal_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
+      }
+    }
+    else {
+      drupal_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
+    }
+    drupal_goto('admin/themes');
+  }
+  return drupal_access_denied();
+}
