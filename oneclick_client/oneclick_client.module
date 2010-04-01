@@ -39,7 +39,7 @@ function oneclick_client_init() {
     $roles = user_roles();
     unset($roles[0]);
     $user = (array) json_decode($resp->data);
-    $uid = db_query("SELECT uid FROM {users} WHERE name = :name", array(':name' => $user['name']))->fetchCol();
+    $uid = db_query("SELECT uid FROM {users} WHERE uid <> 0 AND name = :name", array(':name' => $user['name']))->fetchCol();
     if (empty($uid)) {
       $pass = $user['pass'];
       $user['roles'] = $roles;
@@ -55,11 +55,27 @@ function oneclick_client_init() {
     variable_set('site_mail', $user->mail);
     variable_set('theme_default', 'seven');
     variable_set('error_level', ERROR_REPORTING_DISPLAY_SOME);
+
+    // Enable all themes
+    require_once drupal_get_path('module', 'system').'/system.admin.inc';
+    theme_enable(array_keys(_system_theme_list()));
     
     // Connect to root site and open session for admin user.
-    $first_front = 'http://'.variable_get('site_name', 'localhost').'/admin/appearance?destinatoin=admin/features';
+    $first_front = 'http://'.variable_get('site_name', 'localhost').'/admin/themes?next=admin/features';
     drupal_goto('http://'.variable_get('root_site', '').'/sitecon/client/connect/'.variable_get('site_name', 'localhost').'/login', array('query' => array('redirect' => $first_front)));
   }  
+}
+
+/**
+ * Implements hook_theme().
+ */
+function oneclick_client_theme() {
+  return array(
+    'oneclick_client_theme_select' => array(
+      'variables' => array('theme_groups' => NULL),
+      'file' => 'oneclick_client.admin.inc',
+    ),
+  );
 }
 
 function oneclick_client_is_waiting() {
